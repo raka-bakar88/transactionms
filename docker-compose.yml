@@ -52,7 +52,6 @@ services:
       - "8082:8082"
     networks:
       - microservices_network
-    command: ["./wait-for-it.sh", "kafka:9092", "--", "java", "-jar", "authenticationms.jar"]
   transactionms:
     image: transactionms:latest
     container_name: transactionms_container
@@ -66,7 +65,6 @@ services:
       - "8081:8081"
     networks:
       - microservices_network
-    command: ["./wait-for-it.sh", "kafka:9092", "--", "java", "-jar", "transactionms.jar"]
 networks:
   microservices_network:
     driver: bridge
