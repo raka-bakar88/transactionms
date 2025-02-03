@@ -1,6 +1,6 @@
 package com.challenge.transactionms.config;
 
-import com.challenge.transactionms.model.AuthenticationResponse;
+
 import com.challenge.transactionms.utils.AppConstants;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
@@ -24,9 +24,9 @@ public class KafkaConsumerConfig {
         configProps.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, AppConstants.BOOTSTRAP_SERVERS_CONFIG);
         configProps.put(ConsumerConfig.GROUP_ID_CONFIG, AppConstants.GROUP_ID_CONFIG);
         configProps.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
-        configProps.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, JsonDeserializer.class);
+        configProps.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
         configProps.put(JsonDeserializer.TRUSTED_PACKAGES, "*");
-        return new DefaultKafkaConsumerFactory<>(configProps, new StringDeserializer(), new JsonDeserializer<>(String.class));
+        return new DefaultKafkaConsumerFactory<>(configProps);
     }
 
     @Bean

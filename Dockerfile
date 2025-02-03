@@ -5,7 +5,7 @@ FROM openjdk:17-jdk-slim
 WORKDIR /app
 
 # Copy the jar file from the local machine to the container
-COPY target/transactionms.jar /app/transactionms.jar
+COPY target/transactionms-0.0.1-SNAPSHOT.jar /app/transactionms.jar
 
 # Run the application
 ENTRYPOINT ["java", "-jar", "transactionms.jar"]

@@ -1,9 +1,10 @@
 package com.challenge.transactionms.messaging;
 
-import com.challenge.transactionms.model.AuthenticationResponse;
+import com.challenge.transactionms.model.MessageResponse;
 import com.challenge.transactionms.model.TransactionResponseDTO;
 import com.challenge.transactionms.utils.AppConstants;
 import com.challenge.transactionms.utils.ResponseStore;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AllArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,19 +21,27 @@ public class MessageConsumerService {
 
     @KafkaListener(topics = AppConstants.AUTH_RES_TOPIC, groupId = AppConstants.GROUP_ID_CONFIG)
     public void listen(String response) {
-        TransactionResponseDTO responseDTO = new TransactionResponseDTO(response);
-        logger.info("Message consumed topic: {}", AppConstants.AUTH_RES_TOPIC);
-        logger.info("Message consumed message: {}", response);
+        ObjectMapper objectMapper = new ObjectMapper();
+        try {
+            MessageResponse authenticationResponse = objectMapper.readValue(response, MessageResponse.class);
+            TransactionResponseDTO responseDTO = new TransactionResponseDTO(authenticationResponse.getPayload());
+            logger.info("Message consumed topic: {}", AppConstants.AUTH_RES_TOPIC);
+            logger.info("Message consumed message: {}", response);
+            switch (responseDTO.getAuthorizationStatus()) {
+                case "ACCEPTED":
+                    responseStore.completeRequest(authenticationResponse.getRequestId(), new ResponseEntity<>(responseDTO, HttpStatus.OK));
+                case "REJECTED":
+                    responseStore.completeRequest(authenticationResponse.getRequestId(), new ResponseEntity<>(responseDTO, HttpStatus.FORBIDDEN));
+                case "INVALID":
+                    responseStore.completeRequest(authenticationResponse.getRequestId(), new ResponseEntity<>(responseDTO, HttpStatus.BAD_REQUEST));
+                case "UNKNOWN":
+                    responseStore.completeRequest(authenticationResponse.getRequestId(), new ResponseEntity<>(responseDTO, HttpStatus.INTERNAL_SERVER_ERROR));
 
-        switch (response){
-            case "ACCEPTED" :
-                responseStore.completeRequest(response, new ResponseEntity<>(responseDTO, HttpStatus.OK));
-            case "REJECTED" :
-                responseStore.completeRequest(response, new ResponseEntity<>(responseDTO, HttpStatus.FORBIDDEN));
-            case "INVALID":
-                responseStore.completeRequest(response, new ResponseEntity<>(responseDTO, HttpStatus.BAD_REQUEST));
-            case "UNKNOWN":
-                responseStore.completeRequest(response, new ResponseEntity<>(responseDTO, HttpStatus.INTERNAL_SERVER_ERROR));
+                default:
+                    responseStore.completeRequest(authenticationResponse.getRequestId(), new ResponseEntity<>(responseDTO, HttpStatus.INTERNAL_SERVER_ERROR));
+            }
+        } catch (Exception e) {
+            logger.error(e.getMessage());
         }
     }
 }

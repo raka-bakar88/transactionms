@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Data
-public class AuthenticationRequest {
+public class MessageRequest {
     private String requestId;
     private RequestType type;
     private String payload;
