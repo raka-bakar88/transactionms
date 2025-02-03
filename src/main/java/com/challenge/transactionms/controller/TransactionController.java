@@ -49,7 +49,7 @@ public class TransactionController {
 
         try {
             messageProducerService.authorize(request);
-        }catch (Exception e){
+        } catch (Exception e) {
             responseStore.completeRequest(requestId,
                     new ResponseEntity<>(new TransactionResponseDTO("UNKNOWN"),
                             HttpStatus.INTERNAL_SERVER_ERROR));
