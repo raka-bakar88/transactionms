@@ -13,9 +13,9 @@ public class MessageProducerService {
     private static final Logger logger = LoggerFactory.getLogger(MessageProducerService.class);
 
     @Autowired
-    private KafkaTemplate<String, AuthenticationRequest> kafkaTemplate;
+    private KafkaTemplate<String, String> kafkaTemplate;
 
-    public void authorize(AuthenticationRequest request) {
+    public void authorize(String request) {
         kafkaTemplate.send(AppConstants.AUTH_REQ_TOPIC, request);
         logger.info("Send Kafka topic : {}", AppConstants.AUTH_REQ_TOPIC);
         logger.info("Send Kafka message : {}", request);

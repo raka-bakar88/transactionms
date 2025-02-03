@@ -19,11 +19,20 @@ public class MessageConsumerService {
     private final ResponseStore responseStore;
 
     @KafkaListener(topics = AppConstants.AUTH_RES_TOPIC, groupId = AppConstants.GROUP_ID_CONFIG)
-    public void listen(AuthenticationResponse response) {
-        TransactionResponseDTO responseDTO = new TransactionResponseDTO(response.getPayload());
+    public void listen(String response) {
+        TransactionResponseDTO responseDTO = new TransactionResponseDTO(response);
         logger.info("Message consumed topic: {}", AppConstants.AUTH_RES_TOPIC);
         logger.info("Message consumed message: {}", response);
 
-        responseStore.completeRequest(response.getRequestId(), new ResponseEntity<>(responseDTO, HttpStatus.OK));
+        switch (response){
+            case "ACCEPTED" :
+                responseStore.completeRequest(response, new ResponseEntity<>(responseDTO, HttpStatus.OK));
+            case "REJECTED" :
+                responseStore.completeRequest(response, new ResponseEntity<>(responseDTO, HttpStatus.FORBIDDEN));
+            case "INVALID":
+                responseStore.completeRequest(response, new ResponseEntity<>(responseDTO, HttpStatus.BAD_REQUEST));
+            case "UNKNOWN":
+                responseStore.completeRequest(response, new ResponseEntity<>(responseDTO, HttpStatus.INTERNAL_SERVER_ERROR));
+        }
     }
 }

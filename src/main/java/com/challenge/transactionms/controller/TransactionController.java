@@ -21,7 +21,7 @@ import java.util.concurrent.CompletableFuture;
 
 @AllArgsConstructor
 @RestController
-@RequestMapping("/transaction")
+@RequestMapping("v1/transaction")
 public class TransactionController {
     private static final Logger logger = LoggerFactory.getLogger(TransactionController.class);
 
@@ -34,7 +34,6 @@ public class TransactionController {
     @PostMapping("/authorize")
     public CompletableFuture<ResponseEntity<TransactionResponseDTO>> authorize(@RequestBody TransactionRequestDTO transactionRequestDTO) {
         logger.info("POST request /authorize with requestBody: {}", transactionRequestDTO);
-
         String requestId = UUID.randomUUID().toString();
         AuthenticationRequest request = new AuthenticationRequest(requestId,
                 RequestType.AUTHENTICATION_REQUEST,
@@ -43,7 +42,7 @@ public class TransactionController {
         CompletableFuture<ResponseEntity<TransactionResponseDTO>> futureResponse = new CompletableFuture<>();
         responseStore.storePendingRequest(requestId, futureResponse);
 
-        messageProducerService.authorize(request);
+        messageProducerService.authorize(transactionRequestDTO.getDriverIdentifierDTO().getId());
 
         return futureResponse;
     }
